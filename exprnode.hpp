@@ -49,8 +49,8 @@ class expr_node {
 		virtual void stringify_accesses (std::vector<std::string> &, std::string &) {}
 		virtual void array_access_info (std::string &, int &) {}
 		virtual void gather_participating_labels (std::vector<std::string> &, std::vector<std::string> &, std::vector<std::string>) {}
-		virtual expr_node *unroll_expr (std::string, int, std::vector<std::string>, std::map<std::string,int> &, bool) {}
-		virtual expr_node *deep_copy (void) {}
+		virtual expr_node *unroll_expr(std::string, int, std::vector<std::string>, std::map<std::string, int> &, bool) = 0;
+		virtual expr_node *deep_copy(void) = 0;
 		virtual void set_vect_size (int);
 		virtual void set_gen_fma (bool);	
 		virtual void set_print_intrinsics (bool);
