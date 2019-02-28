@@ -53,7 +53,7 @@ bool expr_node::is_shiftvec_type (void) {
 	return expr_type == T_SHIFTVEC;
 }
 
-void id_node::print_node (stringstream &out) {
+void id_node::print_node (ostream &out) {
 	// out << name;
 	out << label;
 }
@@ -262,7 +262,7 @@ bool uminus_node::is_shiftvec_type (void) {
 	return (base_expr->is_shiftvec_type ()); 
 }
 
-void uminus_node::print_node (stringstream &out) {
+void uminus_node::print_node (ostream &out) {
 	out << "-";
 	if (nested)
 		out << "(";
@@ -428,7 +428,7 @@ void binary_node::set_codegen_parameters (int v, bool g, bool p) {
 	rhs->set_codegen_parameters (v, g, p);
 }
 
-void binary_node::print_node (stringstream &out) {
+void binary_node::print_node (ostream &out) {
 	if (!print_intrinsics) {
         if (nested)
                 out << "(";
@@ -949,7 +949,7 @@ void shiftvec_node::gather_participating_labels (vector<string> &labels, vector<
 	}
 }
 
-void shiftvec_node::print_node (stringstream &out) {
+void shiftvec_node::print_node (ostream &out) {
 	out << print_array ();
 }
 
@@ -1304,7 +1304,7 @@ bool function_node::is_shiftvec_type (DATA_TYPE gdata_type) {
 	return false;
 }
 
-void function_node::print_node (stringstream &out) {
+void function_node::print_node (ostream &out) {
 	out << name << "(";  
 	arg->print_node (out);
 	out << ")";

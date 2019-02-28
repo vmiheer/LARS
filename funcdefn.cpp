@@ -1,4 +1,9 @@
 #include "funcdefn.hpp"
+#if defined(_MSC_VER)
+namespace mywin {
+#include <Windows.h>
+}
+#endif
 
 void stmtnode::set_nonlive_count (void) {
 	nonlive_count = (int)lhs_labels.size() + (int)rhs_labels.size();
@@ -8,11 +13,21 @@ void stmtnode::set_nonlive_count (int val) {
 	nonlive_count = val;
 }
 
-void stmtnode::print_statement (stringstream &output, int vsize) {
+void stmtnode::print_statement (ostream &output, int vsize) {
 	lhs_node->print_node (output);
 	output << print_stmt_op (op_type);
 	rhs_node->print_node (output);
 	output << ";\n";
+}
+
+void stmtnode::dump() {
+	stringstream s;
+	print_statement(s, 0);
+#if defined(_MSC_VER)
+	mywin::OutputDebugString(s.str().c_str());
+#else
+	cout << s;
+#endif
 }
 
 void stmtnode::set_expr_data_types (void) {

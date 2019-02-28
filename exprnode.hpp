@@ -38,7 +38,7 @@ class expr_node {
 		virtual bool simple_nondecomposable_expr (void);
 		virtual bool is_id_type (DATA_TYPE gdata_type);
 		virtual bool is_id_type (void); 
-		virtual void print_node (std::stringstream &) {}
+		virtual void print_node (std::ostream &) {}
 		virtual void print_node (std::stringstream &, std::vector<std::string> &, std::vector<std::string> &, bool, bool) {}
 		virtual void print_node (std::map<std::string, std::string> &, std::stringstream &) {} 
 		virtual void decompose_node (std::vector<std::tuple<expr_node*, expr_node*, STMT_OP>> &, std::vector<std::tuple<expr_node*, expr_node*, STMT_OP>> &, std::vector<expr_node*> &, expr_node *, STMT_OP, int &, DATA_TYPE, bool &, bool &, bool) {}
@@ -100,7 +100,7 @@ class datatype_node : public expr_node {
 		datatype_node (T, DATA_TYPE, int, bool, bool);
 		T get_value (void);
 		void set_type (DATA_TYPE);
-		void print_node (std::stringstream &);
+		void print_node (std::ostream &);
 		void print_node (std::stringstream &, std::vector<std::string> &, std::vector<std::string> &, bool, bool);
 		void print_node (std::map<std::string, std::string> &, std::stringstream &);
 		void decompose_node (std::vector<std::tuple<expr_node*, expr_node*, STMT_OP>> &, std::vector<std::tuple<expr_node*, expr_node*, STMT_OP>> &, std::vector<expr_node*> &, expr_node *, STMT_OP, int &, DATA_TYPE, bool &, bool &, bool);
@@ -146,7 +146,7 @@ inline void datatype_node<T>::set_codegen_parameters (int v, bool g, bool p) {
 }
 
 template<typename T>
-inline void datatype_node<T>::print_node (std::stringstream &out) {
+inline void datatype_node<T>::print_node (std::ostream &out) {
 	std::stringstream val;
 	val << value;
 	if (type == FLOAT) {
@@ -265,7 +265,7 @@ class id_node : public expr_node {
 		id_node (char *, DATA_TYPE, bool, std::string, int, bool, bool);
 		id_node (std::string, DATA_TYPE, bool, std::string, int, bool, bool);
 		void set_type (DATA_TYPE);
-		void print_node (std::stringstream &);
+		void print_node (std::ostream &);
 		void print_node (std::stringstream &, std::vector<std::string> &, std::vector<std::string> &, bool, bool);
 		void print_initializations (std::stringstream &, std::vector<std::string> &, std::vector<std::string>, bool, bool);
 		void print_node (std::map<std::string, std::string> &, std::stringstream &);
@@ -399,7 +399,7 @@ class uminus_node : public expr_node {
 		bool is_shiftvec_type (void);
 		bool is_id_type (DATA_TYPE gdata_type);
 		bool is_id_type (void);
-		void print_node (std::stringstream &);
+		void print_node (std::ostream &);
 		void print_node (std::stringstream &, std::vector<std::string> &, std::vector<std::string> &, bool, bool);
 		void print_initializations (std::stringstream &, std::vector<std::string> &, std::vector<std::string>, bool, bool);
 		void print_node (std::map<std::string, std::string> &, std::stringstream &);
@@ -499,7 +499,7 @@ class binary_node : public expr_node {
 		bool is_id_type (DATA_TYPE gdata_type);
 		bool is_id_type (void);
 		bool simple_nondecomposable_expr (void);
-		void print_node (std::stringstream &);
+		void print_node (std::ostream &);
 		void print_node (std::stringstream &, std::vector<std::string> &, std::vector<std::string> &, bool, bool);
 		void print_initializations (std::stringstream &, std::vector<std::string> &, std::vector<std::string>, bool, bool);
 		void print_node (std::map<std::string, std::string> &, std::stringstream &);
@@ -613,7 +613,7 @@ class shiftvec_node : public expr_node {
 		void set_type (DATA_TYPE); 
 		std::vector<expr_node*>& get_indices (void);
 		void push_index (expr_node *);
-		void print_node (std::stringstream &);
+		void print_node (std::ostream &);
 		void print_node (std::stringstream &, std::vector<std::string> &, std::vector<std::string> &, bool, bool);
 		void print_initializations (std::stringstream &, std::vector<std::string> &, std::vector<std::string>, bool, bool);
 		void print_node (std::map<std::string, std::string> &, std::stringstream &);
@@ -733,7 +733,7 @@ class function_node : public expr_node {
 		void set_type (DATA_TYPE);
 		bool is_shiftvec_type (DATA_TYPE gdata_type);
 		bool is_id_type (DATA_TYPE gdata_type);
-		void print_node (std::stringstream &);
+		void print_node (std::ostream &);
 		void print_node (std::stringstream &, std::vector<std::string> &, std::vector<std::string> &, bool, bool);
 		void print_initializations (std::stringstream &, std::vector<std::string> &, std::vector<std::string>, bool, bool);
 		void print_node (std::map<std::string, std::string> &, std::stringstream &);

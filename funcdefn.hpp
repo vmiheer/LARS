@@ -68,10 +68,17 @@ class stmtnode {
 		void set_executed (void);
 		bool is_label_present (std::string);
 		bool is_label_present (std::string, int &);
-		void print_statement (std::stringstream &, int);
+		void print_statement (std::ostream &, int);
+		void dump();
 		std::string print_statement (std::stringstream &, std::vector<std::string> &, std::vector<std::string>, int);
 		void print_statement (std::map<std::string, std::string> &, std::map<std::string, expr_node*> &, std::map<std::string, int> &, std::map<std::string, int> &, std::vector<std::string> &, std::stringstream &, int);
 };
+
+inline
+ostream& operator<<(ostream &in, stmtnode &s) {
+	s.print_statement(in, 0);
+	return in;
+}
 
 inline stmtnode::stmtnode (STMT_OP op, expr_node *lhs, expr_node *rhs) {
 	op_type = op;
@@ -411,6 +418,26 @@ class funcdefn {
 		void print_order_metric (void);
 		void print_spill_metric (std::vector<std::tuple<std::string, int, int, int, int, int>>);
 		void print_reordered_stmts (std::stringstream &, std::map<std::string, stmtnode*> &, std::deque<stmtnode*> &, PRINT_OPTION);
+		// If the transformation phase changes the code, set this flag
+		// so that subsequent call to log instructions will print the
+		// instructions
+		bool DirtyBitForLogging = false;
+		// These two printProgram functions are needed so that first
+		// could be called from debugger
+		void printProgram() {
+			for (auto s : stmt_list->get_stmt_list()) {
+				s->print_statement(cout, 0);
+			}
+		}
+		void printProgram(const std::string &phase) {
+			if (phase.size()) {
+				cout << "=== Begin Instructions after " << phase << " ===" << endl;
+			}
+			printProgram();
+			if (phase.size()) {
+				cout << "=== End   Instructions after " << phase << " ===" << endl;
+			}
+		};
 };
 
 inline funcdefn::funcdefn (stmtlist *stmts, string_list *args) {
