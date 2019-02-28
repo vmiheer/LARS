@@ -28,6 +28,16 @@ add_executable(lars
   vardecl.cpp
   codegen.cpp
   main.cpp
+  codegen.hpp
+  datatypes.hpp
+  exprnode.hpp
+  funcdefn.hpp
+  grammar.hpp
+  parser.hpp
+  sort.hpp
+  symtab.hpp
+  utils.hpp
+  vardecl.hpp
   ${BISON_MyParser_OUTPUTS}
   ${FLEX_MyScanner_OUTPUTS}
   )
