@@ -1,4 +1,4 @@
-DESCRIPTION
+# DESCRIPTION
 
 The artifact describes LARS, an automated framework to perform reordering
 optimization on straight-line codes; the algorithmic details of the framework
@@ -14,8 +14,8 @@ The downloaded package comes with
 
 
 
-DEPENDENCIES
-
+# DEPENDENCIES
+## Linux
 We tested LARS on ubuntu 16.04 and Red Hat Enterprise Linux Server release 6.7
 using GCC 5.3.0, LLVM 5.0.0. The following are hardware requirements for
 compiling LARS:
@@ -29,10 +29,16 @@ For benchmarking:
 6. GCC >= 7.2.0
 7. LLVM >= 5.0
 
+## Windows
+You can build lars on windows but benchmarking is not available yet.
+```powershell
+# Get Bison/Flex:
+choco install -y winflexbison3
+# Get boost
+vcpkg install boost-dynamic-bitset
+```
 
-
-
-STEPS TO INSTALL AND REPRODUCE RESULTS
+# STEPS TO INSTALL AND REPRODUCE RESULTS
 
 1. Download and install LLVM. If you cannot get the latest version of LLVM from apt or any other repo, you can download it from http://releases.llvm.org/download.html. The installation 
    steps are in https://llvm.org/docs/GettingStarted.html. 
@@ -61,7 +67,7 @@ STEPS TO INSTALL AND REPRODUCE RESULTS
 
 
 
-COPYRIGHT
+# COPYRIGHT
 
 All files in this archive which do not include a prior copyright are by default
 included in this tool and copyrighted 2018 Ohio State University.
@@ -69,6 +75,6 @@ included in this tool and copyrighted 2018 Ohio State University.
 
 
 
-MORE INFORMATION
+# MORE INFORMATION
 
 For more information on how to add a new benchmark, see the docs/ folder or contact me at <rawat.15@osu.edu>
