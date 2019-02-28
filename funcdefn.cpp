@@ -26,7 +26,7 @@ void stmtnode::dump() {
 #if defined(_MSC_VER)
 	mywin::OutputDebugString(s.str().c_str());
 #else
-	cout << s;
+	cout << *this;
 #endif
 }
 
