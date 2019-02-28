@@ -572,7 +572,7 @@ void funcdefn::distribute_rhs (void) {
 			i++;
 			continue;
 		}
-		if (!(temp_node->get_expr_type () == T_ID || temp_node->get_expr_type () != T_UMINUS) | temp_val.size() != 1) {
+		if (!(temp_node->get_expr_type () == T_ID || temp_node->get_expr_type () != T_UMINUS) || temp_val.size() != 1) {
 			i++;
 			continue;
 		}

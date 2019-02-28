@@ -29,7 +29,7 @@ inline bool sort_order_metric_a0 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -59,7 +59,7 @@ inline bool sort_order_metric_a0_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -95,7 +95,7 @@ inline bool sort_order_metric_b0 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -133,7 +133,7 @@ inline bool sort_order_metric_b0_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -171,7 +171,7 @@ inline bool sort_order_metric_b1 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -211,7 +211,7 @@ inline bool sort_order_metric_b1_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -248,7 +248,7 @@ inline bool sort_order_metric_b2 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -288,7 +288,7 @@ inline bool sort_order_metric_b2_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -325,7 +325,7 @@ inline bool sort_order_metric_b3 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -365,7 +365,7 @@ inline bool sort_order_metric_b3_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -402,7 +402,7 @@ inline bool sort_order_metric_b4 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -442,7 +442,7 @@ inline bool sort_order_metric_b4_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -479,7 +479,7 @@ inline bool sort_order_metric_b5 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -519,7 +519,7 @@ inline bool sort_order_metric_b5_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -558,7 +558,7 @@ inline bool sort_order_metric_b6 (tuple<string,int,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
@@ -598,7 +598,7 @@ inline bool sort_order_metric_b6_ilp (tuple<string,int,int,int,int,int,int,int,i
 	vector<int> b_vec = get<19>(b);
 	if (a_vec.size() != b_vec.size()) 
 		return (a_vec.size() < b_vec.size());
-	if (a_vec.size() > 0 & b_vec.size() > 0) {
+	if ((a_vec.size() > 0) && (b_vec.size() > 0)) {
 		vector<int>::const_iterator j=b_vec.begin();
 		for (vector<int>::const_iterator i=a_vec.begin(); i!=a_vec.end(); i++,j++) {
 			if (*i != *j) return (*i < *j);
