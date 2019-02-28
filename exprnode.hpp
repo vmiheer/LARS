@@ -542,6 +542,7 @@ inline binary_node::binary_node (OP_TYPE a_type, expr_node *a_lhs, expr_node *a_
 }
 
 inline binary_node::binary_node (OP_TYPE a_type, expr_node *a_lhs, expr_node *a_rhs, int v, bool g, bool p) {
+	assert(a_lhs && a_rhs);
 	op = a_type;
 	lhs = a_lhs;
 	rhs = a_rhs;

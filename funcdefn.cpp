@@ -568,7 +568,9 @@ void funcdefn::distribute_rhs (void) {
 				coef_node = bin_rhs;
 			}
 		}
-		if (temp_node == NULL) {
+		// TODO: if coef node is UMINUS node, stringify is not defined for it so
+		// coef node will be NULL in that case.
+		if (temp_node == NULL || coef_node == NULL) {
 			i++;
 			continue;
 		}
