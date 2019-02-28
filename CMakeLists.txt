@@ -41,7 +41,9 @@ add_executable(lars
   ${BISON_MyParser_OUTPUTS}
   ${FLEX_MyScanner_OUTPUTS}
   )
-add_custom_target(dummy ALL
-  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:lars>/$<TARGET_FILE_NAME:lars> "${lars_SOURCE_DIR}/test"
-  DEPENDS lars)
+if (NOT WIN32)
+  add_custom_target(dummy ALL
+    COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:lars>/$<TARGET_FILE_NAME:lars> "${lars_SOURCE_DIR}/test"
+    DEPENDS lars)
+  endif()
 target_link_libraries(lars PRIVATE Boost::boost)
