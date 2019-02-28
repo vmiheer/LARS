@@ -108,13 +108,16 @@ void codegen::generate_code (stringstream &reorder, stringstream &slc, stringstr
 		//defn->remove_redundant_stmts ();
 		// Now unroll the statement
 		defn->unroll_stmts (start->get_unroll_decl ());
-		// Decompose statement into accumulations
 		defn->set_codegen_parameters (vsize, gen_fma, print_intrinsics);
+
+		// Decompose statement into accumulations
 		defn->decompose_statements (gdata_type);
 		defn->print_decomposed_statements (slc_acc);
 		defn->set_codegen_parameters (vsize, gen_fma, print_intrinsics);
 		if (AVAIL_EXPR_OPT) defn->optimize_available_expressions ();
+		if (DEBUG) defn->printProgram("avail expression");
 		if (distribute_rhs) defn->distribute_rhs ();
+		if (DEBUG) defn->printProgram("distribute rhs");
 		// Create labels for accesses
 		defn->create_labels ();
 		defn->compute_participating_labels ();

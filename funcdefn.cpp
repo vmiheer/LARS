@@ -507,6 +507,7 @@ void funcdefn::compute_participating_labels (void) {
 	for (vector<stmtnode*>::const_iterator i=stmts.begin(); i!=stmts.end(); i++) {
 		expr_node *lhs = (*i)->get_lhs_expr ();
 		expr_node *rhs = (*i)->get_rhs_expr ();
+		// Actually gathers in vectors returned by get_[lr]hs_labels()
 		lhs->gather_participating_labels ((*i)->get_lhs_labels (), (*i)->get_lhs_names (), coefficients);
 		rhs->gather_participating_labels ((*i)->get_rhs_labels (), (*i)->get_rhs_names (), coefficients);
 		(*i)->set_nonlive_count ();
@@ -782,6 +783,7 @@ void funcdefn::decompose_statements (DATA_TYPE gdata_type) {
 	int id = 0, stmt_num = 0, orig_stmt_num = 0;
 	int s_count = 0;
 	for (vector<stmtnode*>::const_iterator i=stmts.begin(); i!=stmts.end(); i++, orig_stmt_num++) {
+		//           LHS       , RHS       , OP
 		vector<tuple<expr_node*, expr_node*, STMT_OP>> tstmt;
 		vector<tuple<expr_node*, expr_node*, STMT_OP>> init;
 		expr_node *lhs = (*i)->get_lhs_expr ();
@@ -1401,10 +1403,9 @@ void funcdefn::compute_scatter_gather_contributions (void) {
 		vector<string> r_labels = (*i)->get_rhs_labels ();
 		// Gather contributions
 		for (vector<string>::iterator s1=l_labels.begin(); s1!=l_labels.end(); s1++) {
-			if (gather_contributions.find(*s1) == gather_contributions.end() && r_labels.size() > 0) {
-				vector<string> contributing_labels;
-				gather_contributions[*s1] = contributing_labels;	
-			}
+			if (gather_contributions.find(*s1) == gather_contributions.end() && r_labels.size() > 0)
+				gather_contributions[*s1] = {};
+
 			vector<string> &tvec = gather_contributions[*s1];
 			for (vector<string>::iterator s2=r_labels.begin(); s2!=r_labels.end(); s2++) {
 				if (find (tvec.begin(), tvec.end(), *s2) == tvec.end())
@@ -1413,10 +1414,9 @@ void funcdefn::compute_scatter_gather_contributions (void) {
 		}
 		// Scatter contributions
 		for (vector<string>::iterator s2=r_labels.begin(); s2!=r_labels.end(); s2++) {
-			if (scatter_contributions.find(*s2) == scatter_contributions.end() && l_labels.size() > 0) {
-				vector<string> scatter_labels;
-				scatter_contributions[*s2] = scatter_labels;
-			}
+			if (scatter_contributions.find(*s2) == scatter_contributions.end() && l_labels.size() > 0)
+				scatter_contributions[*s2] = {};
+
 			vector<string> &tvec = scatter_contributions[*s2];
 			for (vector<string>::iterator s1=l_labels.begin(); s1!=l_labels.end(); s1++) {
 				if (find (tvec.begin(), tvec.end(), *s1) == tvec.end ())

@@ -291,6 +291,7 @@ class funcdefn {
 		std::map<int, int> clusterwise_stmts_executed;
 		std::map<int, boost::dynamic_bitset<>> labels_per_stmt; 
 		std::map<std::string, std::vector<int>> stmts_per_label;
+		// f(i) -> d Given statement i in stmts how many decomposed statements d are created?
 		std::map<int, int> clusterwise_stmt_count;
 		std::map<std::string, std::string> register_mapping;
 		std::map<std::string, expr_node*> label_to_node_map;

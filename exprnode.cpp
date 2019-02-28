@@ -498,6 +498,7 @@ expr_node *binary_node::deep_copy (void) {
 }
 
 void binary_node::decompose_node (vector<tuple<expr_node*, expr_node*, STMT_OP>> &tstmt, vector<tuple<expr_node*, expr_node*, STMT_OP>> &init, vector<expr_node*> &temp_vars, expr_node *alhs, STMT_OP cur_op, int &id, DATA_TYPE gdata_type, bool &local_assigned, bool &global_assigned, bool flip) {
+	// Also assign the data type to all identifiers and array operands as global data type e.g. double
 	if (is_id_type (gdata_type) || is_shiftvec_type (gdata_type)) {
 		if (!local_assigned) cur_op = acc_start_op (cur_op);
 		cur_op = get_cur_op (cur_op, flip);
