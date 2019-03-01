@@ -1096,8 +1096,9 @@ void shiftvec_node::create_labels (map<string, expr_node*> &label_map) {
 		string id = "";
 		int offset = 0;
 		(*i)->array_access_info (id, offset);
+		// TODO: Find out why is this check needed?
 		if (id.length () > 1)
-			label = label + "(" + id + ")";
+			label = label + "_" + id + "_";
 		else label = label + id;
 		if (offset == 0) label = label + "c";
 		else if (offset < 0) label = label + "m";
