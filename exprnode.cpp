@@ -1,5 +1,27 @@
 #include "exprnode.hpp"
+
+#if defined(_MSC_VER)
+namespace mywin {
+#include <Windows.h>
+}
+#endif
+
 using namespace std;
+
+ostream& operator<<(ostream &o, expr_node &e) {
+	e.print_node(o);
+	return o;
+}
+
+void expr_node::dump() {
+	stringstream s;
+	print_node(s);
+#if defined(_MSC_VER)
+	mywin::OutputDebugString(s.str().c_str());
+#else
+	cout << *this;
+#endif
+}
 
 DATA_TYPE expr_node::get_type (void) {
 	return type;
@@ -1243,15 +1265,18 @@ void function_node::set_codegen_parameters (int v, bool g, bool p) {
 	vsize = v;
         gen_fma = g;
         print_intrinsics = p;
-	arg->set_codegen_parameters (v, g, p);
+				for (auto arg : arg->get_list())
+					arg->set_codegen_parameters(v, g, p);
 }
 
 void function_node::create_labels (map<string, expr_node*> &label_map) {
-	arg->create_labels (label_map);
+	for (auto arg : arg->get_list())
+		arg->create_labels(label_map);
 }
 
 void function_node::create_labels (map<string, int> &lassign_map, map<string, expr_node*> &label_map, bool is_asgn) {
-	arg->create_labels (lassign_map, label_map, is_asgn);
+	for (auto arg : arg->get_list())
+		arg->create_labels(lassign_map, label_map, is_asgn);
 }
 
 //void function_node::stringify_accesses (vector<string> &labels, map<string, int> &lassign_map, bool is_asgn) {
@@ -1265,95 +1290,156 @@ void function_node::create_labels (map<string, int> &lassign_map, map<string, ex
 //}
 
 void function_node::stringify_accesses (vector<string> &labels) {
-	arg->stringify_accesses (labels);
+	for (auto arg : arg->get_list())
+		arg->stringify_accesses(labels);
 }
 
 void function_node::stringify_accesses (vector<string> &labels, string &expr_label) {
 	expr_label = expr_label + name + "(";
-	arg->stringify_accesses (labels, expr_label);
+	for (auto arg : arg->get_list())
+		arg->stringify_accesses(labels, expr_label);
 	expr_label = expr_label + ")";
 }
 
 void function_node::gather_participating_labels (vector<string> &labels, vector<string> &names, vector<string> coefficients) {
-	arg->gather_participating_labels (labels, names, coefficients);
+	for (auto arg : arg->get_list())
+		arg->gather_participating_labels(labels, names, coefficients);
 }
 
 bool function_node::is_data_type (DATA_TYPE gdata_type) {
-	if (arg->is_data_type (gdata_type)) {
-		type = gdata_type;
-		return true;
+	bool ret = true;
+	for (auto arg : arg->get_list()) {
+		if (arg->is_data_type(gdata_type)) {
+			type = gdata_type;
+		} else {
+			ret = false;
+		}
 	}
-	return false;
+	return ret;
 }
 
 bool function_node::is_data_type (void) {
-	return arg->is_data_type ();
+	bool ret = true;
+	for (auto arg : arg->get_list())
+		ret &= arg->is_data_type();
+	return ret;
 }
 
 bool function_node::is_id_type (DATA_TYPE gdata_type) {
-	if (arg->is_id_type (gdata_type)) {
-		type = arg->get_type ();
-		return true;
-	}
-	return false;
+	bool ret = true;
+	for (auto arg : arg->get_list())
+		if (arg->is_id_type(gdata_type)) {
+			type = arg->get_type();
+		} else {
+			ret = false;
+		}
+	return ret;
 }
 
 bool function_node::is_shiftvec_type (DATA_TYPE gdata_type) {
-	if (arg->is_shiftvec_type (gdata_type)) {
-		type = arg->get_type ();
-		return true;
-	}
-	return false;
+	bool ret = true;
+	for (auto arg : arg->get_list())
+		if (arg->is_shiftvec_type(gdata_type)) {
+			type = arg->get_type();
+		} else {
+			ret = false;
+		}
+	return ret;
 }
 
 void function_node::print_node (ostream &out) {
-	out << name << "(";  
-	arg->print_node (out);
+	out << name << "(";
+	auto args = arg->get_list();
+	auto firstElem = true;
+	for (auto a = args.begin(), ae = args.end(); a != ae; ++a) {
+		if (!firstElem)
+			out << ", ";
+		firstElem = false;
+		(*a)->print_node(out);
+	}
 	out << ")";
 }
 
-void function_node::print_node (stringstream &out, vector<string> &initialized_labels, vector<string> &iters, bool perform_load, bool is_lhs) {
-        if (print_intrinsics) {
+void function_node::print_node(stringstream &out,
+															 vector<string> &initialized_labels,
+															 vector<string> &iters, bool perform_load,
+															 bool is_lhs) {
+	if (print_intrinsics) {
 		out << "_mm" << to_string(vsize) << "_" << name;
                 if (type == DOUBLE) out << "_pd(";
                 else if (type == FLOAT) out << "_ps(";
                 else out << "_epi64(";
-	}
-	else
+	} else {
 		out << name << "(";
-	arg->print_node (out, initialized_labels, iters, perform_load, is_lhs);
-	out << ")";
+		auto args = arg->get_list();
+		auto firstElem = true;
+		for (auto a = args.begin(), ae = args.end(); a != ae; ++a) {
+			if (!firstElem)
+				out << ", ";
+			firstElem = false;
+			(*a)->print_node(out);
+		}
+		out << ")";
+	}
 }
 
 void function_node::print_initializations (stringstream &header_output, vector<string> &initialized_labels, vector<string> iters, bool perform_load, bool is_lhs) {
-	arg->print_initializations (header_output, initialized_labels, iters, perform_load, is_lhs);
+	for (auto arg : arg->get_list()) {
+		arg->print_initializations(header_output, initialized_labels, iters,
+															 perform_load, is_lhs);
+	}
 }
 
 void function_node::print_node (map<string, string> &reg_map, stringstream &out) {
-	out << name << "(";  
-	arg->print_node (reg_map, out);
+	out << name << "(";
+	auto args = arg->get_list();
+	auto firstElem = true;
+	for (auto a = args.begin(), ae = args.end(); a != ae; ++a) {
+		if (!firstElem)
+			out << ", ";
+		firstElem = false;
+		(*a)->print_node(out);
+	}
 	out << ")";
 }
 
-expr_node *function_node::unroll_expr (string s, int val, vector<string> coefficients, map<string,int> &scalar_count, bool is_lhs) {
-	expr_node *new_arg = arg->unroll_expr (s, val, coefficients, scalar_count, is_lhs);
-	return new function_node (name, new_arg, type, nested, vsize, gen_fma, print_intrinsics);
+expr_node *function_node::unroll_expr(string s, int val,
+																			vector<string> coefficients,
+																			map<string, int> &scalar_count,
+																			bool is_lhs) {
+	expr_list *new_args = new expr_list();
+	for (auto arg : arg->get_list())
+		new_args->push_back(
+				arg->unroll_expr(s, val, coefficients, scalar_count, is_lhs));
+	return new function_node(name, new_args, type, nested, vsize, gen_fma,
+													 print_intrinsics);
 }
 
 expr_node *function_node::deep_copy (void) {
-	expr_node *new_arg = arg->deep_copy ();
-	return new function_node (name, new_arg, type, nested, vsize, gen_fma, print_intrinsics);
+	expr_list *new_args = new expr_list();
+	for (auto arg : arg->get_list())
+		new_args->push_back(arg->deep_copy());
+	return new function_node(name, new_args, type, nested, vsize, gen_fma,
+													 print_intrinsics);
 }
 
 void function_node::decompose_node(vector<tuple<expr_node*, expr_node*, STMT_OP>> &tstmt, vector<tuple<expr_node*, expr_node*, STMT_OP>> &init, vector<expr_node*> &temp_vars, expr_node *alhs, STMT_OP cur_op, int &id, DATA_TYPE gdata_type, bool &local_assigned, bool &global_assigned, bool flip) {
-	// Visit the argument with a separate lhs
-	string name_t = "_t_" + to_string (id++) + "_";
-	expr_node *new_arg = new id_node (name_t, vsize, gen_fma, print_intrinsics);
-	bool nested_local_assigned = false; 
-	bool nested_global_assigned = false;
-	bool nested_flip = false;
-	arg->decompose_node (tstmt, init, temp_vars, new_arg, ST_EQ, id, gdata_type, nested_local_assigned, nested_global_assigned, nested_flip);
-	expr_node *new_rhs = new function_node (name, new_arg, vsize, gen_fma, print_intrinsics);
+	expr_list *newArgs = new expr_list();
+	for (auto myargs : arg->get_list()) {
+		// Visit the argument with a separate lhs
+		string name_t = "_t_" + to_string(id++) + "_";
+		expr_node *new_arg = new id_node(name_t, vsize, gen_fma, print_intrinsics);
+		bool nested_local_assigned = false;
+		bool nested_global_assigned = false;
+		bool nested_flip = false;
+		myargs->decompose_node(tstmt, init, temp_vars, new_arg, ST_EQ, id,
+													 gdata_type, nested_local_assigned,
+													 nested_global_assigned, nested_flip);
+		newArgs->push_back(new_arg);
+		temp_vars.push_back(new_arg);
+	}
+	expr_node *new_rhs =
+			new function_node(name, newArgs, vsize, gen_fma, print_intrinsics);
 	if (!local_assigned) cur_op = acc_start_op (cur_op);
 	cur_op = get_cur_op (cur_op, flip);
 	if (!global_assigned && cur_op != ST_EQ) 
@@ -1364,6 +1450,5 @@ void function_node::decompose_node(vector<tuple<expr_node*, expr_node*, STMT_OP>
 	// Now infer the types
 	new_rhs->set_type (gdata_type);
 	alhs->set_type (gdata_type);
-	temp_vars.push_back (new_arg);
 	temp_vars.push_back (new_rhs);
 }

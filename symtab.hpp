@@ -43,6 +43,8 @@ inline std::vector<std::string> string_list::get_list (void) {
 	return vec_list;
 }
 
+class expr_node;
+
 /* A class that represents a vector of expressions */
 class expr_list : public vectab<expr_node *> {
 	public:

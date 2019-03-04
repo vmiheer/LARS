@@ -30,6 +30,7 @@
 	class funcdefn *func_defn;
 	class stmtlist *stmt_list;
 	class expr_node *exprnode;
+	class expr_list *exprlist;
 	class shiftvec_node *shiftvecnode;
 	class string_list *stringlist;
 	class range_list *rangelist;
@@ -62,6 +63,7 @@
 %type <shiftvecnode> offsetvar
 %type <shiftvecnode> offsetlist
 %type <exprnode> arrayaccess 
+%type <exprlist> exprList
 %%
 
 start : {grammar::start = new start_node ();} program {}
@@ -134,8 +136,11 @@ stmt : ID {$$ = new id_node ($1);}
 	| stmt '^' stmt {$$ = new binary_node (T_EXP, $1, $3);}
 	| '(' stmt ')' {$2->set_nested (); 
 			$$ = $2;}
-	| ID '(' stmt ')' {$$ = new function_node ($1, $3);} 
+	| ID '(' exprList ')' {$$ = new function_node ($1, $3);} 
 	;
+
+exprList : exprList ',' stmt { $1->push_back($3); $$ = $1; }
+		 | stmt { expr_list *s = new expr_list(); s->push_back($1); $$ = s; }
 
 /* Array access, of the form A[k+1][j+2][i+1] or A[k+1,j+2,i+1] */
 offsetvar : ID '[' offsetlist ']' {$3->set_name ($1); 

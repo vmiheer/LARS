@@ -1,18 +1,19 @@
 #ifndef __EXPRNODE_HPP__
 #define __EXPRNODE_HPP__
-#include <cstdio>
-#include <cstdlib>
-#include <string>
-#include <vector>
-#include <tuple>
-#include <map>
-#include <cmath>
-#include <iostream>
-#include <cassert>
-#include <sstream>
+#include "symtab.hpp"
+#include "utils.hpp"
 #include <algorithm>
 #include <boost/dynamic_bitset.hpp>
-#include "utils.hpp" 
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <vector>
 
 class expr_node {
 	protected:
@@ -31,6 +32,7 @@ class expr_node {
 		DATA_TYPE get_type (void);
 		void set_nested (void);
 		bool is_nested (void);
+		void dump();
 		virtual bool is_data_type (DATA_TYPE gdata_type);
 		virtual bool is_data_type (void);
 		virtual bool is_shiftvec_type (DATA_TYPE gdata_type);
@@ -56,6 +58,8 @@ class expr_node {
 		virtual void set_print_intrinsics (bool);
 		virtual void set_codegen_parameters (int, bool, bool); 
 };
+
+std::ostream& operator<<(std::ostream&, expr_node&);
 
 inline ETYPE expr_node::get_expr_type (void) {
 	return expr_type;
@@ -719,16 +723,16 @@ inline void shiftvec_node::push_index (expr_node *node) {
 
 class function_node : public expr_node {
 	private:
-		expr_node *arg;
+		expr_list *arg;
 	public:
-		function_node (char *, expr_node *);
-		function_node (char *, expr_node *, DATA_TYPE, bool);
-		function_node (std::string, expr_node *);
-		function_node (std::string, expr_node *, DATA_TYPE, bool);
-		function_node (char *, expr_node *, int, bool, bool);
-		function_node (char *, expr_node *, DATA_TYPE, bool, int, bool, bool);
-		function_node (std::string, expr_node *, int, bool, bool);
-		function_node (std::string, expr_node *, DATA_TYPE, bool, int, bool, bool);
+		function_node(char *, expr_list *);
+		function_node(char *, expr_list *, DATA_TYPE, bool);
+		function_node(std::string, expr_list *);
+		function_node(std::string, expr_list *, DATA_TYPE, bool);
+		function_node(char *, expr_list *, int, bool, bool);
+		function_node(char *, expr_list *, DATA_TYPE, bool, int, bool, bool);
+		function_node(std::string, expr_list *, int, bool, bool);
+		function_node(std::string, expr_list *, DATA_TYPE, bool, int, bool, bool);
 		bool is_data_type (DATA_TYPE gdata_type);
 		bool is_data_type (void);
 		void set_type (DATA_TYPE);
@@ -749,13 +753,14 @@ class function_node : public expr_node {
 		void set_codegen_parameters (int, bool, bool);
 };
 
-inline function_node::function_node (char *s, expr_node *t) {
+inline function_node::function_node(char *s, expr_list *t) {
 	name = std::string (s);
 	arg = t;
 	expr_type = T_FUNCTION; 
 }
 
-inline function_node::function_node (char *s, expr_node *ag, DATA_TYPE t, bool nest) {
+inline function_node::function_node(char *s, expr_list *ag, DATA_TYPE t,
+																		bool nest) {
 	name = std::string (s);
 	arg = ag;
 	expr_type = T_FUNCTION; 
@@ -763,13 +768,14 @@ inline function_node::function_node (char *s, expr_node *ag, DATA_TYPE t, bool n
 	nested = nest;
 }
 
-inline function_node::function_node (std::string s, expr_node *t) {
+inline function_node::function_node(std::string s, expr_list *t) {
 	name = s;
 	arg = t;
 	expr_type = T_FUNCTION; 
 }
 
-inline function_node::function_node (std::string s, expr_node *ag, DATA_TYPE t, bool nest) { 
+inline function_node::function_node(std::string s, expr_list *ag, DATA_TYPE t,
+																		bool nest) {
 	name = s;
 	arg = ag; 
 	expr_type = T_FUNCTION;
@@ -777,7 +783,8 @@ inline function_node::function_node (std::string s, expr_node *ag, DATA_TYPE t, 
 	nested = nest;
 }
 
-inline function_node::function_node (char *s, expr_node *t, int v, bool g, bool p) {
+inline function_node::function_node(char *s, expr_list *t, int v, bool g,
+																		bool p) {
 	name = std::string (s);
 	arg = t;
 	expr_type = T_FUNCTION; 
@@ -786,7 +793,8 @@ inline function_node::function_node (char *s, expr_node *t, int v, bool g, bool 
         print_intrinsics = p;
 }
 
-inline function_node::function_node (char *s, expr_node *ag, DATA_TYPE t, bool nest, int v, bool g, bool p) {
+inline function_node::function_node(char *s, expr_list *ag, DATA_TYPE t,
+																		bool nest, int v, bool g, bool p) {
 	name = std::string (s);
 	arg = ag;
 	expr_type = T_FUNCTION; 
@@ -797,7 +805,8 @@ inline function_node::function_node (char *s, expr_node *ag, DATA_TYPE t, bool n
         print_intrinsics = p;
 }
 
-inline function_node::function_node (std::string s, expr_node *t, int v, bool g, bool p) {
+inline function_node::function_node(std::string s, expr_list *t, int v, bool g,
+																		bool p) {
 	name = s;
 	arg = t;
 	expr_type = T_FUNCTION; 
@@ -806,7 +815,8 @@ inline function_node::function_node (std::string s, expr_node *t, int v, bool g,
         print_intrinsics = p;
 }
 
-inline function_node::function_node (std::string s, expr_node *ag, DATA_TYPE t, bool nest, int v, bool g, bool p) { 
+inline function_node::function_node(std::string s, expr_list *ag, DATA_TYPE t,
+																		bool nest, int v, bool g, bool p) {
 	name = s;
 	arg = ag; 
 	expr_type = T_FUNCTION;
@@ -818,7 +828,9 @@ inline function_node::function_node (std::string s, expr_node *ag, DATA_TYPE t, 
 }
 
 inline void function_node::set_type (DATA_TYPE dtype) {
-	arg->set_type (dtype);
+	for (auto a : arg->get_list()) {
+		a->set_type(dtype);
+	}
 	type = dtype;
 }
 
