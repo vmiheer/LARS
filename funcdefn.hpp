@@ -419,6 +419,7 @@ class funcdefn {
 		void compute_decomposed_stmts_per_label (std::map<std::string,std::vector<int>> &);
 		void compute_leading_stmt (std::map<int, std::vector<int>> &);
 		void compute_participating_labels (void);
+		void compute_traditional_dependences(void);
 		void compute_dependences (void);
 		void compute_cluster_dependences (void);
 		void compute_reuse_graph (std::map<std::tuple<int,int>, boost::dynamic_bitset<>> &, std::map<int, boost::dynamic_bitset<>>);

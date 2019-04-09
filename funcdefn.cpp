@@ -1662,6 +1662,40 @@ void funcdefn::compute_cluster_dependences (void) {
 	}
 }
 
+static void add_dependence(std::map<stmtnode *, std::vector<stmtnode *>> &deps,
+													 stmtnode *from, stmtnode *to) {
+	if (!BelongsToMap(deps, to))
+		deps[to] = {};
+	deps[to].push_back(from);
+}
+
+void funcdefn::compute_traditional_dependences(void)
+{
+	const vector<stmtnode *> &stmts = stmt_list->get_stmt_list();
+	// Given index return last definition/use of this node
+	map<unsigned, stmtnode*> last_def, last_use;
+	for (auto &s : stmts) {
+		for (auto &def : s->def_set) {
+			if (BelongsToMap(last_def, def)) {
+				// WAW dependence
+				add_dependence(substmt_dependence_graph, last_def[def], s);
+			}
+			else if (BelongsToMap(last_use, def)) {
+				// WAR dependence
+				add_dependence(substmt_dependence_graph, last_use[def], s);
+			}
+		}
+		for (auto &use : s->use_set) {
+			if (BelongsToMap(last_def, use)) {
+				// RAW dependence
+				add_dependence(substmt_dependence_graph, last_def[use], s);
+			}
+		}
+		for (auto &def : s->def_set) last_def[def] = s;
+		for (auto &use : s->use_set) last_def[use] = s;
+	}
+}
+
 void funcdefn::compute_dependences(void) {
 	// First compute the substatement dependences
 	vector<stmtnode *> stmts = stmt_list->get_stmt_list();
@@ -1688,6 +1722,19 @@ void funcdefn::compute_dependences(void) {
 				}
 			}
 		}
+	}
+
+	// In traditional dependence, the indegree of any instruction node is at max the number of operands of that instruction
+// By default when lars creates dependences, consider instructions:
+// 1. a += ...
+// 2. a += ...
+// 3. a += ...
+// 4.   = a
+// it adds edges 1->4, 2->4, 3->4 and avoids edges 1->2, 2->3
+// traditional dependencies instead creates the other depencies
+	if (TRADITIONAL_DEPENDENCE) {
+		compute_traditional_dependences();
+		return;
 	}
 
 	// Clear the dependence graph, start from scratch
