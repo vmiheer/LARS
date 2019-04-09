@@ -1616,28 +1616,9 @@ void funcdefn::compute_cluster_dependences (void) {
 			for (vector<stmtnode*>::iterator it=initial_assignments.begin(); it!=initial_assignments.end(); it++) 
 				init_asgn |= (((*it)->get_lhs_expr() == (*i)->get_lhs_expr()) || ((*it)->get_lhs_expr() == (*j)->get_lhs_expr()));
 			if (init_asgn) {
-				i_label = (*i)->get_lhs_labels ();
-				j_label = (*j)->get_lhs_labels ();
-				for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-					for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-						if ((*s1).compare (*s2) == 0) {
-							dependence = true;
-							break;
-						}
-					}
-				}
-				//i_label = (*i)->get_lhs_names ();
-				//j_label = (*j)->get_lhs_names ();
-				//for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-				//	for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-				//		if ((*s1).compare (*s2) == 0) {
-				//			dependence = true;
-				//			break;
-				//		}
-				//	}
-				//}
+				dependence = NonEmptyIntersection((*i)->def_set, (*j)->def_set);
 				if (dependence) {
-					if (DEBUG) printf ("Found WAW dependence between source cluster %d and dest cluster %d\n", j_cluster_num, i_cluster_num);
+					if (DEBUG > 5) printf ("Found WAW dependence between source cluster %d and dest cluster %d\n", j_cluster_num, i_cluster_num);
 					if (cluster_dependence_graph.find (i_cluster_num) == cluster_dependence_graph.end ()) {
 						vector<int> dep_stmts;
 						dep_stmts.push_back (j_cluster_num);
@@ -1650,29 +1631,9 @@ void funcdefn::compute_cluster_dependences (void) {
 				}
 			}
 			// 2. WAR dependence
-			i_label = (*i)->get_lhs_labels ();
-			j_label = (*j)->get_rhs_labels ();
-			dependence = false;
-			for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-				for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-					if ((*s1).compare (*s2) == 0) {
-						dependence = true;
-						break;
-					}
-				}
-			}
-			//i_label = (*i)->get_lhs_names ();
-			//j_label = (*j)->get_rhs_names ();
-			//for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-			//	for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-			//		if ((*s1).compare (*s2) == 0) {
-			//			dependence = true;
-			//			break;
-			//		}
-			//	}
-			//}
+			dependence = NonEmptyIntersection((*i)->def_set, (*j)->use_set);
 			if (dependence) {
-				if (DEBUG) printf ("Found WAR dependence between source cluster %d and dest cluster %d\n", j_cluster_num, i_cluster_num);
+				if (DEBUG > 5) printf ("Found WAR dependence between source cluster %d and dest cluster %d\n", j_cluster_num, i_cluster_num);
 				if (cluster_dependence_graph.find (i_cluster_num) == cluster_dependence_graph.end ()) {
 					vector<int> dep_stmts;
 					dep_stmts.push_back (j_cluster_num);
@@ -1683,30 +1644,10 @@ void funcdefn::compute_cluster_dependences (void) {
 						(cluster_dependence_graph[i_cluster_num]).push_back (j_cluster_num); 
 				}
 			}
-			// 2. RAW dependence
-			i_label = (*i)->get_rhs_labels ();
-			j_label = (*j)->get_lhs_labels ();
-			dependence = false;
-			for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-				for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-					if ((*s1).compare (*s2) == 0) {
-						dependence = true;
-						break;
-					}
-				}
-			}
-			//i_label = (*i)->get_rhs_names ();
-			//j_label = (*j)->get_lhs_names ();
-			//for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-			//	for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-			//		if ((*s1).compare (*s2) == 0) {
-			//			dependence = true;
-			//			break;
-			//		}
-			//	}
-			//}
+			// 3. RAW dependence
+			dependence = NonEmptyIntersection((*i)->use_set, (*j)->def_set);
 			if (dependence) {
-				if (DEBUG) printf ("Found RAW dependence between source cluster %d and dest cluster %d\n", j_cluster_num, i_cluster_num);
+				if (DEBUG > 5) printf ("Found RAW dependence between source cluster %d and dest cluster %d\n", j_cluster_num, i_cluster_num);
 				if (cluster_dependence_graph.find (i_cluster_num) == cluster_dependence_graph.end ()) {
 					vector<int> dep_stmts;
 					dep_stmts.push_back (j_cluster_num);
@@ -1721,128 +1662,116 @@ void funcdefn::compute_cluster_dependences (void) {
 	}
 }
 
-void funcdefn::compute_dependences (void) {
+void funcdefn::compute_dependences(void) {
 	// First compute the substatement dependences
-	vector<stmtnode*> stmts = stmt_list->get_stmt_list ();
-	vector<string> i_label;
-	vector<string> j_label;
+	vector<stmtnode *> stmts = stmt_list->get_stmt_list();
 	bool dependence;
+
+	// Preprocessing
+	unsigned index = 0;
+	for (auto s : stmts) {
+		for (auto label : s->get_lhs_labels()) {
+			if (BelongsToMap(labelIndexMap, label)) {
+				s->def_set.insert(labelIndexMap[label]);
+			} else {
+				labelIndexMap[label] = index++;
+				s->def_set.insert(index - 1);
+			}
+		}
+		for (auto label : s->get_rhs_labels()) {
+			if (BelongsToMap(labelIndexMap, label)) {
+				if (BelongsToMap(labelIndexMap, label)) {
+					s->use_set.insert(labelIndexMap[label]);
+				} else {
+					labelIndexMap[label] = index++;
+					s->use_set.insert(index - 1);
+				}
+			}
+		}
+	}
+
 	// Clear the dependence graph, start from scratch
-	cluster_dependence_graph.clear ();
+	cluster_dependence_graph.clear();
 	// Compute the statement dependences
-	if (DEBUG) cout << "\nCOMPUTING CLUSTER DEPENDENCE GRAPH\n";
-	compute_cluster_dependences ();
+	if (DEBUG)
+		cout << "\nCOMPUTING CLUSTER DEPENDENCE GRAPH\n";
+	compute_cluster_dependences();
 	// Now compute the dependence between substatements
-	substmt_dependence_graph.clear ();
-	if (DEBUG) cout << "\nCOMPUTING SUB-STATEMENT DEPENDENCE GRAPH\n";
-	for (vector<stmtnode*>::const_iterator i=stmts.begin(); i!=stmts.end(); i++) {
-		if ((*i)->is_executed()) continue;
+	substmt_dependence_graph.clear();
+	if (DEBUG)
+		cout << "\nCOMPUTING SUB-STATEMENT DEPENDENCE GRAPH\n";
+	for (vector<stmtnode *>::const_iterator i = stmts.begin(); i != stmts.end();
+			 i++) {
+		if ((*i)->is_executed())
+			continue;
 		// Go over all previous statements to figure out dependences. No need to
 		// compute dependences if the statement is already executed
-		for (vector<stmtnode*>::const_iterator j=stmts.begin(); j!=i; j++) {
-			if ((*j)->is_executed()) continue;
-			// 1. WAW dependence is only if either of them is an assignment, or they both have different orig_stmt_num
-			dependence = false;
-			if ((*i)->get_op_type() == ST_EQ || (*j)->get_op_type() == ST_EQ || dependence_exists_in_dependence_graph (cluster_dependence_graph, (*j)->get_orig_stmt_num(), (*i)->get_orig_stmt_num())) {
-				i_label = (*i)->get_lhs_labels ();
-				j_label = (*j)->get_lhs_labels ();
-				for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-					for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-						if ((*s1).compare (*s2) == 0) {
-							dependence = true;
-							break;
-						}
-					}
-				}
-				//i_label = (*i)->get_lhs_names ();
-				//j_label = (*j)->get_lhs_names ();
-				//for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-				//	for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-				//		if ((*s1).compare (*s2) == 0) {
-				//			dependence = true;
-				//			break;
-				//		}
-				//	}
-				//}
+		for (vector<stmtnode *>::const_iterator j = stmts.begin(); j != i; j++) {
+			if ((*j)->is_executed())
+				continue;
+			// 1. WAW dependence is only if either of them is an assignment, or they
+			// both have different orig_stmt_num
+			if ((*i)->get_op_type() == ST_EQ || (*j)->get_op_type() == ST_EQ ||
+					dependence_exists_in_dependence_graph(cluster_dependence_graph,
+																								(*j)->get_orig_stmt_num(),
+																								(*i)->get_orig_stmt_num())) {
+				dependence = NonEmptyIntersection((*i)->def_set, (*j)->def_set);
 				if (dependence) {
-					if (DEBUG) printf ("Found WAW dependence between source sub-stmt %d and dest sub-stmt %d\n", (*j)->get_stmt_num (), (*i)->get_stmt_num ());
-					if (substmt_dependence_graph.find (*i) == substmt_dependence_graph.end ()) {
-						vector<stmtnode*> dep_stmts;
-						dep_stmts.push_back (*j);
+					if (((*i)->get_stmt_num() == 2708))
+						(void)(*i);
+					if (DEBUG > 5)
+						printf("Found WAW dependence between source sub-stmt %d and dest "
+									 "sub-stmt %d\n",
+									 (*j)->get_stmt_num(), (*i)->get_stmt_num());
+					if (substmt_dependence_graph.find(*i) ==
+							substmt_dependence_graph.end()) {
+						vector<stmtnode *> dep_stmts;
+						dep_stmts.push_back(*j);
 						substmt_dependence_graph[*i] = dep_stmts;
+					} else {
+						if (find((substmt_dependence_graph[*i]).begin(),
+										 (substmt_dependence_graph[*i]).end(),
+										 *j) == (substmt_dependence_graph[*i]).end())
+							(substmt_dependence_graph[*i]).push_back(*j);
 					}
-					else {
-						if (find ((substmt_dependence_graph[*i]).begin(), (substmt_dependence_graph[*i]).end(), *j) == (substmt_dependence_graph[*i]).end())
-							(substmt_dependence_graph[*i]).push_back (*j); 
 					}
 				}
-			}
 			// 2. WAR dependence
-			i_label = (*i)->get_lhs_labels ();
-			j_label = (*j)->get_rhs_labels ();
-			dependence = false;
-			for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-				for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-					if ((*s1).compare (*s2) == 0) {
-						dependence = true;
-						break;
-					}
-				}
-			}
-			i_label = (*i)->get_lhs_names ();
-			j_label = (*j)->get_rhs_names ();
-			//for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-			//	for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-			//		if ((*s1).compare (*s2) == 0) {
-			//			dependence = true;
-			//			break;
-			//		}
-			//	}
-			//}
+			dependence = NonEmptyIntersection((*i)->def_set, (*j)->use_set);
 			if (dependence) {
-				if (DEBUG) printf ("Found WAR dependence between source sub-stmt %d and dest sub-stmt %d\n", (*j)->get_stmt_num (), (*i)->get_stmt_num ());
-				if (substmt_dependence_graph.find (*i) == substmt_dependence_graph.end ()) {
-					vector<stmtnode*> dep_stmts;
-					dep_stmts.push_back (*j);
+				if (DEBUG > 5)
+					printf("Found WAR dependence between source sub-stmt %d and dest "
+								 "sub-stmt %d\n",
+								 (*j)->get_stmt_num(), (*i)->get_stmt_num());
+				if (substmt_dependence_graph.find(*i) ==
+						substmt_dependence_graph.end()) {
+					vector<stmtnode *> dep_stmts;
+					dep_stmts.push_back(*j);
 					substmt_dependence_graph[*i] = dep_stmts;
+				} else {
+					if (find((substmt_dependence_graph[*i]).begin(),
+									 (substmt_dependence_graph[*i]).end(),
+									 *j) == (substmt_dependence_graph[*i]).end())
+						(substmt_dependence_graph[*i]).push_back(*j);
 				}
-				else {
-					if (find ((substmt_dependence_graph[*i]).begin(), (substmt_dependence_graph[*i]).end(), *j) == (substmt_dependence_graph[*i]).end())
-						(substmt_dependence_graph[*i]).push_back (*j); 
 				}
-			}
-			// 2. RAW dependence
-			i_label = (*i)->get_rhs_labels ();
-			j_label = (*j)->get_lhs_labels ();
-			dependence = false;
-			for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-				for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-					if ((*s1).compare (*s2) == 0) {
-						dependence = true;
-						break;
-					}
-				}
-			}
-			//i_label = (*i)->get_rhs_names ();
-			//j_label = (*j)->get_lhs_names ();
-			//for (vector<string>::iterator s2=j_label.begin(); s2!=j_label.end(); s2++) {
-			//	for (vector<string>::iterator s1=i_label.begin(); s1!=i_label.end(); s1++) {
-			//		if ((*s1).compare (*s2) == 0) {
-			//			dependence = true;
-			//			break;
-			//		}
-			//	}
-			//}
+			// 3. RAW dependence
+			dependence = NonEmptyIntersection((*i)->use_set, (*j)->def_set);
 			if (dependence) {
-				if (DEBUG) printf ("Found RAW dependence between source sub-stmt %d and dest sub-stmt %d\n", (*j)->get_stmt_num (), (*i)->get_stmt_num ());
-				if (substmt_dependence_graph.find (*i) == substmt_dependence_graph.end ()) {
-					vector<stmtnode*> dep_stmts;
-					dep_stmts.push_back (*j);
+				if (DEBUG > 5)
+					printf("Found RAW dependence between source sub-stmt %d and dest "
+								 "sub-stmt %d\n",
+								 (*j)->get_stmt_num(), (*i)->get_stmt_num());
+				if (substmt_dependence_graph.find(*i) ==
+						substmt_dependence_graph.end()) {
+					vector<stmtnode *> dep_stmts;
+					dep_stmts.push_back(*j);
 					substmt_dependence_graph[*i] = dep_stmts;
-				}
-				else {
-					if (find ((substmt_dependence_graph[*i]).begin(), (substmt_dependence_graph[*i]).end(), *j) == (substmt_dependence_graph[*i]).end())
-						(substmt_dependence_graph[*i]).push_back (*j); 
+				} else {
+					if (find((substmt_dependence_graph[*i]).begin(),
+									 (substmt_dependence_graph[*i]).end(),
+									 *j) == (substmt_dependence_graph[*i]).end())
+						(substmt_dependence_graph[*i]).push_back(*j);
 				}
 			}
 		}

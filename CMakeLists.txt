@@ -19,6 +19,12 @@ add_definitions(-DDEBUG=true -DDROP_COEFS=true -DASSOC_MULT=false
   -DPAR_LOADS=1 -DEXPLICIT_LOADS=false -DRESTRICT_INTER_OPT=true
   -DSPLICE_TEMP_LABELS=false -DINTRA_TYPE_INTER_OPT=false -DFIRST_LEVEL=false
   -DSECOND_LEVEL=true -DOPERATION_VIEW=false)
+
+# For bit faster debugging
+if (MSVC)
+  add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
+endif()
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${lars_SOURCE_DIR})
 

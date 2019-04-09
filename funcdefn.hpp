@@ -6,6 +6,7 @@
 #include <vector>
 #include <deque>
 #include <map>
+#include <set>
 #include <sstream>
 #include <cassert>
 #include <tuple>
@@ -19,6 +20,29 @@ enum PRINT_OPTION {
 	INIT_EMBED,
 };
 
+template <class T> bool BelongsToMap(const T &a, typename T::key_type b) {
+	return a.find(b) != a.end();
+}
+
+/// Given two sets return if they have atleast one common element
+#pragma optimize("gt", on )
+template<class T>
+bool NonEmptyIntersection(const std::set<T>& x, const std::set<T>& y)
+{
+	std::set<T>::const_iterator i = x.begin();
+	std::set<T>::const_iterator j = y.begin();
+	while (i != x.end() && j != y.end())
+	{
+		if (*i == *j)
+			return true;
+		else if (*i < *j)
+			++i;
+		else
+			++j;
+	}
+	return false;
+}
+
 /* A class representing a statement of the form a = b + c;
    The lhs is a string, and rhs is an expression node. */
 class stmtnode {
@@ -31,6 +55,8 @@ class stmtnode {
 		int stmt_num, orig_stmt_num,live_count=0, nonlive_count;
 		bool executed=false, gen_fma = true, print_intrinsics = true;
 	public:
+		// Instead of comparing labels, compare label indices
+		std::set<unsigned> def_set, use_set;
 		stmtnode (STMT_OP, expr_node *, expr_node *);
 		stmtnode (STMT_OP, expr_node *, expr_node *, int);
 		stmtnode (STMT_OP, expr_node *, expr_node *, int, int);
@@ -271,6 +297,8 @@ inline void stmtlist::set_stmt_list (std::vector<stmtnode*> sl) {
 
 class funcdefn {
 	private:
+		// Given a labelIndexMap(label) -> index, index is used in set (def|use)_set
+		std::map<std::string, unsigned> labelIndexMap;
 		int dim=0, max_reg=255, reg_count=0, total_stmts=0, total_orig_stmts=0, acc_size=1, interlock_size=2, vsize=256, label_count=0;
 		bool split_accs=false, topological_sort=false, gen_fma=true, print_intrinsics=true;
 		std::string sort_function;
